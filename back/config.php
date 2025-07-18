@@ -95,31 +95,100 @@ function initializeDatabase()
     // Insert sample articles
     $sampleArticles = [
         [
-            'SpaceX Successfully Launches New Satellite Constellation',
-            'spacex-satellite-constellation',
-            'SpaceX has successfully launched its latest satellite constellation, marking a significant milestone in space technology. The revolutionary satellite network promises to provide global internet coverage, bringing high-speed connectivity to remote areas around the world. This launch represents the culmination of years of research and development in satellite technology.',
+            'BREAKING: Major Earthquake Strikes Pacific Coast',
+            'breaking-major-earthquake-pacific-coast',
+            'A powerful 7.2 magnitude earthquake has struck the Pacific Coast, causing widespread damage and triggering tsunami warnings. Emergency services are responding to multiple locations as aftershocks continue to rattle the region. The earthquake epicenter was located 50 miles offshore, and coastal communities are being evacuated as a precaution.',
+            1, // Politics category
+            'earthquake.jpg',
+            true, // Breaking news
+            true  // Featured
+        ],
+        [
+            'BREAKING: Global Tech Giant Announces Revolutionary AI Breakthrough',
+            'breaking-ai-breakthrough-announcement',
+            'A major technology company has announced a groundbreaking artificial intelligence breakthrough that could revolutionize multiple industries. The new AI system demonstrates unprecedented capabilities in natural language processing and problem-solving, marking a significant leap forward in artificial intelligence development.',
             2, // Technology category
-            'spacex-launch.jpg'
+            'ai-breakthrough.jpg',
+            true, // Breaking news
+            true  // Featured
+        ],
+        [
+            'Revolutionary Quantum Computing Milestone Achieved',
+            'quantum-computing-milestone-achieved',
+            'Scientists have achieved a major milestone in quantum computing, successfully demonstrating quantum supremacy in a practical application. This breakthrough represents a significant step forward in the development of quantum computing technology and its potential applications in cryptography, drug discovery, and climate modeling.',
+            2, // Technology category
+            'quantum-computing.jpg',
+            false, // Not breaking
+            true   // Featured
         ],
         [
             'New Climate Policy Framework Announced at Global Summit',
-            'climate-policy-global-summit',
+            'climate-policy-global-summit-announcement',
             'World leaders have agreed on ambitious new targets for carbon reduction, setting the stage for a sustainable future. The new climate policy framework includes comprehensive measures to reduce greenhouse gas emissions and promote renewable energy adoption worldwide.',
             1, // Politics category
-            'climate-summit.jpg'
+            'climate-summit.jpg',
+            false, // Not breaking
+            true   // Featured
         ],
         [
             'Underdog Team Makes Historic Championship Victory',
             'underdog-team-championship-victory',
             'In an unexpected turn of events, the underdogs have claimed the championship title, creating one of the greatest sports stories of the year. The team overcame incredible odds to secure their first championship in franchise history.',
             3, // Sports category
-            'championship-victory.jpg'
+            'championship-victory.jpg',
+            false, // Not breaking
+            false  // Not featured
+        ],
+        [
+            'Major Film Studio Announces Groundbreaking Virtual Reality Movie',
+            'virtual-reality-movie-announcement',
+            'A major Hollywood studio has announced plans to produce the first-ever feature-length virtual reality movie, marking a revolutionary moment in the entertainment industry. The project will allow viewers to experience the story from multiple perspectives and interact with the narrative in unprecedented ways.',
+            4, // Entertainment category
+            'vr-movie.jpg',
+            false, // Not breaking
+            true   // Featured
+        ],
+        [
+            'Global Economy Shows Strong Recovery Signs',
+            'global-economy-recovery-signs',
+            'Recent economic data indicates that the global economy is showing strong signs of recovery, with growth rates exceeding expectations across major markets. This positive trend has been attributed to several factors, including increased consumer spending, technological innovation, and improved international trade relations.',
+            5, // Business category
+            'economy-recovery.jpg',
+            false, // Not breaking
+            false  // Not featured
+        ],
+        [
+            'Breakthrough in Renewable Energy Storage Technology',
+            'renewable-energy-storage-breakthrough',
+            'Scientists have announced a major breakthrough in renewable energy storage technology that could solve one of the biggest challenges facing the clean energy industry. The new battery technology offers significantly higher energy density and longer lifespan than current solutions.',
+            2, // Technology category
+            'energy-storage.jpg',
+            false, // Not breaking
+            false  // Not featured
+        ],
+        [
+            'New Study Reveals Benefits of Mediterranean Diet',
+            'mediterranean-diet-study-reveals',
+            'A comprehensive study has revealed significant health benefits associated with the Mediterranean diet, including reduced risk of heart disease and improved cognitive function. The research involved over 10,000 participants and provides strong evidence for the diet\'s effectiveness.',
+            6, // Health category
+            'mediterranean-diet.jpg',
+            false, // Not breaking
+            false  // Not featured
+        ],
+        [
+            'Olympic Committee Announces New Sports for Next Games',
+            'olympic-new-sports-announcement',
+            'The International Olympic Committee has announced the addition of several new sports to the program for the next Olympic Games, reflecting the evolving nature of sports and the desire to appeal to younger audiences. The new additions include esports, skateboarding, and sport climbing.',
+            3, // Sports category
+            'olympic-sports.jpg',
+            false, // Not breaking
+            false  // Not featured
         ]
     ];
 
-    $stmt = $pdo->prepare("INSERT IGNORE INTO articles (title, slug, content, category_id, image_url , published_date) VALUES (?, ?, ?, ?, ? , ?)");
+    $stmt = $pdo->prepare("INSERT IGNORE INTO articles (title, slug, content, category_id, image_url, is_breaking, is_featured, published_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
     foreach ($sampleArticles as $article) {
-        $stmt->execute([$article[0], $article[1], $article[2], $article[3], $article[4], date("Y-m-d H:i:s")]);
+        $stmt->execute([$article[0], $article[1], $article[2], $article[3], $article[4], $article[5], $article[6], date("Y-m-d H:i:s")]);
     }
 }
 

@@ -117,9 +117,12 @@ Welcome to your comprehensive news website! This guide will help you understand 
 ## 🔧 Admin Panel (Administrators Only)
 
 ### Accessing Admin Panel
-1. **Login** - Use admin credentials
+1. **Login** - Use admin credentials:
+   - **Username**: `admin`
+   - **Email**: `admin@news.com`
+   - **Password**: `admin123`
 2. **Admin Role** - Ensure you have admin privileges
-3. **Admin Dashboard** - Access via `/back/admin.php`
+3. **Admin Dashboard** - Access via `/front/admin.php`
 
 ### Dashboard Overview
 - **Statistics Cards**:
