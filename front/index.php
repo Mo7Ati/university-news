@@ -1,6 +1,7 @@
 <?php
 require_once '../back/config.php';
 require_once '../back/get_articles.php';
+require_once '../back/user_auth.php';
 $newsManager = new NewsManager();
 $featuredArticles = $newsManager->getFeaturedArticles(4);
 $breakingNews = $newsManager->getBreakingNews();
@@ -35,29 +36,42 @@ function getCategoryIcon($categoryName)
 <body>
     <!-- Header -->
     <header>
-        <div class="header-container">
+
+        <div class="title-search">
             <div class="logo">
                 <i class="fas fa-globe"></i>
                 <span>Global News Network</span>
             </div>
-            <nav>
-                <ul>
-                    <li><a href="#home">Home</a></li>
-                    <li><a href="#politics">Politics</a></li>
-                    <li><a href="#technology">Technology</a></li>
-                    <li><a href="#sports">Sports</a></li>
-                    <li><a href="#entertainment">Entertainment</a></li>
-                    <li><a href="#about">About Us</a></li>
-                    <li><a href="#contact">Contact</a></li>
-                </ul>
-            </nav>
             <div class="header-right">
-                <div class="search-bar">
+                <form class="search-bar" method="get" action="search.php">
                     <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search articles..." id="searchInput">
-                </div>
+                    <input type="text" name="q" placeholder="Search articles..." required>
+                </form>
+                <?php if (is_logged_in()): ?>
+                    <div class="auth-buttons">
+                        <span class="user-welcome">Welcome,
+                            <?php echo htmlspecialchars($_SESSION['username']); ?></span>
+                        <a href="logout.php" class="btn btn-outline">Logout</a>
+                    </div>
+                <?php else: ?>
+                    <div class="auth-buttons">
+                        <a href="login.php" class="btn btn-outline">Login</a>
+                        <a href="register.php" class="btn btn-primary">Register</a>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
+        <nav>
+            <ul>
+                <li><a href="index.php">Home</a></li>
+                <li><a href="category.php?category=Politics">Politics</a></li>
+                <li><a href="category.php?category=Technology">Technology</a></li>
+                <li><a href="category.php?category=Sports">Sports</a></li>
+                <li><a href="category.php?category=Entertainment">Entertainment</a></li>
+                <li><a href="about.php">About Us</a></li>
+                <li><a href="contact.php">Contact</a></li>
+            </ul>
+        </nav>
     </header>
     <!-- Main Content -->
     <div class="main-container">
@@ -77,7 +91,7 @@ function getCategoryIcon($categoryName)
                     <h2 class="section-title">Featured Articles</h2>
                     <div class="featured-grid">
                         <?php foreach ($featuredArticles as $article): ?>
-                            <article class="article-card">
+                            <article class="article-card" onclick="window.location.href='article.php?id=<?php echo $article['id']; ?>'">
                                 <div class="article-image">
                                     <i
                                         class="<?php echo htmlspecialchars($article['category_name'] ? getCategoryIcon($article['category_name']) : 'fas fa-newspaper'); ?>"></i>
@@ -104,7 +118,7 @@ function getCategoryIcon($categoryName)
                 <h2 class="section-title">Latest News</h2>
                 <div class="news-list">
                     <?php foreach ($latestNews as $article): ?>
-                        <article class="news-item">
+                        <article class="news-item" onclick="window.location.href='article.php?id=<?php echo $article['id']; ?>'">
                             <div class="news-thumbnail">
                                 <i class="<?php echo getCategoryIcon($article['category_name']); ?>"></i>
                             </div>
@@ -136,7 +150,7 @@ function getCategoryIcon($categoryName)
                 <h3 class="sidebar-title">Trending Now</h3>
                 <ul class="trending-list">
                     <?php foreach ($trendingArticles as $article): ?>
-                        <li><?php echo htmlspecialchars($article['title']); ?></li>
+                        <li onclick="window.location.href='article.php?id=<?php echo $article['id']; ?>'"><?php echo htmlspecialchars($article['title']); ?></li>
                     <?php endforeach; ?>
                 </ul>
             </div>
@@ -170,21 +184,19 @@ function getCategoryIcon($categoryName)
                 <div class="footer-section">
                     <h3>Quick Links</h3>
                     <ul>
-                        <li><a href="#home">Home</a></li>
-                        <li><a href="#about">About Us</a></li>
-                        <li><a href="#contact">Contact</a></li>
-                        <li><a href="#privacy">Privacy Policy</a></li>
-                        <li><a href="#terms">Terms of Service</a></li>
+                        <li><a href="index.php">Home</a></li>
+                        <li><a href="about.php">About Us</a></li>
+                        <li><a href="contact.php">Contact</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
                     <h3>Categories</h3>
                     <ul>
-                        <li><a href="#politics">Politics</a></li>
-                        <li><a href="#technology">Technology</a></li>
-                        <li><a href="#sports">Sports</a></li>
-                        <li><a href="#entertainment">Entertainment</a></li>
-                        <li><a href="#business">Business</a></li>
+                        <li><a href="category.php?category=Politics">Politics</a></li>
+                        <li><a href="category.php?category=Technology">Technology</a></li>
+                        <li><a href="category.php?category=Sports">Sports</a></li>
+                        <li><a href="category.php?category=Entertainment">Entertainment</a></li>
+                        <li><a href="category.php?category=Business">Business</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
@@ -202,83 +214,7 @@ function getCategoryIcon($categoryName)
             </div>
         </div>
     </footer>
-    <script>
-        // Search functionality
-        document.getElementById('searchInput').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                const query = this.value.trim();
-                if (query) {
-                    window.location.href = '?search=' + encodeURIComponent(query);
-                }
-            }
-        });
-        // Category filtering
-        const urlParams = new URLSearchParams(window.location.search);
-        const category = urlParams.get('category');
-        const search = urlParams.get('search');
-        if (category || search) {
-            // Load filtered content via AJAX
-            loadFilteredContent();
-        }
-        function loadFilteredContent() {
-            const container = document.querySelector('.featured-section');
-            const loadingHtml = '<div style="text-align: center; padding: 2rem;"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
-            container.innerHTML = loadingHtml;
-            let url = 'news.php?action=';
-            if (category) {
-                url += 'category&category=' + encodeURIComponent(category);
-            } else if (search) {
-                url += 'search&q=' + encodeURIComponent(search);
-            }
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    displayArticles(data.articles, category ? 'Category: ' + category : 'Search Results for: ' + search);
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    container.innerHTML = '<div style="text-align: center; padding: 2rem; color: red;">Error loading content</div>';
-                });
-        }
-        function displayArticles(articles, title) {
-            const container = document.querySelector('.featured-section');
-            let html = '<h2 class="section-title">' + title + '</h2>';
-            html += '<div class="featured-grid">';
-            if (articles.length === 0) {
-                html += '<div style="text-align: center; padding: 2rem; color: #666;">No articles found</div>';
-            } else {
-                articles.forEach(article => {
-                    html += `
-                        <article class="article-card">
-                            <div class="article-image">
-                                <i class="fas fa-newspaper"></i>
-                            </div>
-                            <div class="article-content">
-                                <div class="article-category">${article.category_name || 'Uncategorized'}</div>
-                                <h3 class="article-title">${article.title}</h3>
-                                <div class="article-meta">
-                                    <span><i class="fas fa-clock"></i> ${formatTimeAgo(article.published_date)}</span>
-                                    <span><i class="fas fa-eye"></i> ${article.views} views</span>
-                                </div>
-                            </div>
-                        </article>
-                    `;
-                });
-            }
-            html += '</div>';
-            container.innerHTML = html;
-        }
-        function formatTimeAgo(datetime) {
-            const time = new Date(datetime);
-            const now = new Date();
-            const diff = Math.floor((now - time) / 1000);
-            if (diff < 60) return 'Just now';
-            if (diff < 3600) return Math.floor(diff / 60) + ' minute' + (Math.floor(diff / 60) > 1 ? 's' : '') + ' ago';
-            if (diff < 86400) return Math.floor(diff / 3600) + ' hour' + (Math.floor(diff / 3600) > 1 ? 's' : '') + ' ago';
-            if (diff < 2592000) return Math.floor(diff / 86400) + ' day' + (Math.floor(diff / 86400) > 1 ? 's' : '') + ' ago';
-            return time.toLocaleDateString();
-        }
-    </script>
+  
 </body>
 
 </html>

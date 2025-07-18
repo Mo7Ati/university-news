@@ -1,18 +1,33 @@
 <?php
 require_once '../back/config.php';
 require_once '../back/get_articles.php';
+require_once '../back/user_auth.php';
 
 $newsManager = new NewsManager();
 $categoryName = '';
 $articles = [];
 
+
+function getCategoryIcon($categoryName)
+{
+    $icons = [
+        'Politics' => 'fas fa-balance-scale',
+        'Technology' => 'fas fa-rocket',
+        'Sports' => 'fas fa-futbol',
+        'Entertainment' => 'fas fa-film',
+        'Business' => 'fas fa-chart-line',
+        'Health' => 'fas fa-heartbeat'
+    ];
+    return $icons[$categoryName] ?? 'fas fa-newspaper';
+}
+
 if (isset($_GET['category'])) {
-    $articles = $newsManager->getArticlesByCategory($_GET['category']);
+    $result = $newsManager->getArticlesByCategory($_GET['category']);
+    $articles = $result['articles'];
     $categoryName = $_GET['category'];
 } else {
     echo "Articles For This Category Not Found";
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -28,65 +43,78 @@ if (isset($_GET['category'])) {
 <body>
     <!-- Header -->
     <header>
-        <div class="header-container">
+        <div class="title-search">
             <div class="logo">
                 <i class="fas fa-globe"></i>
                 <span>Global News Network</span>
             </div>
-            <nav>
-                <ul>
-                    <li><a href="#home">Home</a></li>
-                    <li><a href="#politics">Politics</a></li>
-                    <li><a href="#technology">Technology</a></li>
-                    <li><a href="#sports">Sports</a></li>
-                    <li><a href="#entertainment">Entertainment</a></li>
-                    <li><a href="#about">About Us</a></li>
-                    <li><a href="#contact">Contact</a></li>
-                </ul>
-            </nav>
             <div class="header-right">
-                <div class="search-bar">
+                <form class="search-bar" method="get" action="search.php">
                     <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search articles..." id="searchInput">
-                </div>
-            </div>
-        </div>
-    </header>
-    <!-- Main Content -->
-    <main class="category-main">
-        <section class="category-section">
-            <h2 class="section-title">
-                <?php echo $categoryName ? htmlspecialchars($categoryName) : 'Category'; ?> Articles
-            </h2>
-            <div class="featured-grid">
-                <?php if (!empty($articles)): ?>
-                    <?php foreach ($articles as $article): ?>
-                        <article class="article-card">
-                            <div class="article-image">
-                                <i class="<?php echo getCategoryIcon($categoryName); ?>"></i>
-                            </div>
-                            <div class="article-content">
-                                <div class="article-category"><?php echo htmlspecialchars($categoryName); ?></div>
-                                <h3 class="article-title">
-                                    <a href="article.php?id=<?php echo urlencode($article['slug']); ?>">
-                                        <?php echo htmlspecialchars($article['title']); ?>
-                                    </a>
-                                </h3>
-                                <div class="article-meta">
-                                    <span><i class="fas fa-user"></i>
-                                        <?php echo htmlspecialchars($article['author_name'] ?? 'Unknown'); ?></span>
-                                    <span><i class="fas fa-clock"></i>
-                                        <?php echo date('M j, Y', strtotime($article['published_date'])); ?></span>
-                                </div>
-                            </div>
-                        </article>
-                    <?php endforeach; ?>
+                    <input type="text" name="q" placeholder="Search articles..." required>
+                </form>
+                <?php if (is_logged_in()): ?>
+                    <div class="auth-buttons">
+                        <span class="user-welcome">Welcome,
+                            <?php echo htmlspecialchars($_SESSION['username']); ?></span>
+                        <a href="logout.php" class="btn btn-outline">Logout</a>
+                    </div>
                 <?php else: ?>
-                    <div style="padding:2rem; text-align:center; color:#888;">No articles found in this category.</div>
+                    <div class="auth-buttons">
+                        <a href="login.php" class="btn btn-outline">Login</a>
+                        <a href="register.php" class="btn btn-primary">Register</a>
+                    </div>
                 <?php endif; ?>
             </div>
-        </section>
-    </main>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.php">Home</a></li>
+                <li><a href="category.php?category=Politics">Politics</a></li>
+                <li><a href="category.php?category=Technology">Technology</a></li>
+                <li><a href="category.php?category=Sports">Sports</a></li>
+                <li><a href="category.php?category=Entertainment">Entertainment</a></li>
+                <li><a href="about.php">About Us</a></li>
+                <li><a href="contact.php">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+    <!-- Main Content -->
+    <div class="main-container">
+        <main>
+            <?php if (!empty($articles)): ?>
+                <div class="category-header">
+                    <h1><i class="<?php echo getCategoryIcon($categoryName); ?>"></i>
+                        <?php echo htmlspecialchars($categoryName); ?></h1>
+                </div>
+                <div class="articles-list">
+                    <?php foreach ($articles as $article): ?>
+                        <div class="article-card" onclick="window.location.href='article.php?id=<?php echo $article['id']; ?>'">
+                            <h2 class="article-title">
+                                <?php echo htmlspecialchars($article['title'] ?? 'Untitled'); ?>
+                            </h2>
+                            <div class="article-meta">
+                                <?php if (!empty($article['author'])): ?>
+                                    <span class="author">By <?php echo htmlspecialchars($article['author']); ?></span>
+                                <?php endif; ?>
+                                <?php if (!empty($article['date'])): ?>
+                                    <span class="date"> | <?php echo htmlspecialchars($article['date']); ?></span>
+                                <?php endif; ?>
+                            </div>
+                            <p class="article-summary">
+                                <?php echo nl2br(htmlspecialchars($article['summary'] ?? $article['content'] ?? '')); ?>
+                            </p>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php else: ?>
+                <div class="no-articles">
+                    <i class="fas fa-folder-open" style="font-size:2.5rem;color:#667eea;margin-bottom:0.5rem;"></i>
+                    <p>No articles found for this category.</p>
+                </div>
+            <?php endif; ?>
+        </main>
+    </div>
     <!-- Footer -->
     <footer>
         <div class="footer-container">
@@ -105,21 +133,19 @@ if (isset($_GET['category'])) {
                 <div class="footer-section">
                     <h3>Quick Links</h3>
                     <ul>
-                        <li><a href="#home">Home</a></li>
-                        <li><a href="#about">About Us</a></li>
-                        <li><a href="#contact">Contact</a></li>
-                        <li><a href="#privacy">Privacy Policy</a></li>
-                        <li><a href="#terms">Terms of Service</a></li>
+                        <li><a href="index.php">Home</a></li>
+                        <li><a href="about.php">About Us</a></li>
+                        <li><a href="contact.php">Contact</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
                     <h3>Categories</h3>
                     <ul>
-                        <li><a href="#politics">Politics</a></li>
-                        <li><a href="#technology">Technology</a></li>
-                        <li><a href="#sports">Sports</a></li>
-                        <li><a href="#entertainment">Entertainment</a></li>
-                        <li><a href="#business">Business</a></li>
+                        <li><a href="category.php?category=Politics">Politics</a></li>
+                        <li><a href="category.php?category=Technology">Technology</a></li>
+                        <li><a href="category.php?category=Sports">Sports</a></li>
+                        <li><a href="category.php?category=Entertainment">Entertainment</a></li>
+                        <li><a href="category.php?category=Business">Business</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
@@ -137,6 +163,17 @@ if (isset($_GET['category'])) {
             </div>
         </div>
     </footer>
+    <script>
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                const query = this.value.trim();
+                if (query) {
+                    window.location.href = 'index.php?search=' + encodeURIComponent(query);
+                }
+            }
+        });
+    </script>
 </body>
 
 </html>

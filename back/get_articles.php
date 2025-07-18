@@ -121,16 +121,7 @@ class NewsManager
             ");
             $stmt->execute([$categorySlug]);
             $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-            // Get total count for pagination
-            $stmt = $this->pdo->prepare("
-                SELECT COUNT(*) FROM articles a
-                LEFT JOIN categories c ON a.category_id = c.id
-                WHERE c.slug = ?
-            ");
-            $stmt->execute([$categorySlug]);
-            $total = $stmt->fetchColumn();
-
+            
             return [
                 'articles' => $articles,
                 'category' => $categorySlug
