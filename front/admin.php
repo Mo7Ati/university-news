@@ -688,7 +688,7 @@ $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
             modal.style.display = 'block';
             modal.classList.add('loading');
 
-            const url = `get_article.php?action=get_article&id=${articleId}`;
+            const url = `../back/get_article.php?action=get_article&id=${articleId}`;
             console.log('Fetching from URL:', url);
 
             // Fetch article data via AJAX
@@ -736,7 +736,7 @@ $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
             categoryModal.style.display = 'block';
             categoryModal.classList.add('loading');
 
-            const url = `get_article.php?action=get_category&id=${categoryId}`;
+            const url = `../back/get_article.php?action=get_category&id=${categoryId}`;
             console.log('Fetching from URL:', url);
 
             // Fetch category data via AJAX
